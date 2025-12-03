@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "monto": 15000.0,
+    "categoria": "Entretenimiento",
+    "descripcion": "Youtube",
+    "fecha": "2025-12-01"
+  }
+]
