@@ -15,7 +15,7 @@ from util.listas import (
     gastos_mes,
     pretty_gasto,
 )
-
+#===Definicion De Funciones===#
 DB_FILE = os.path.join("database", "gastos.json")
 
 def ensure_db_exists():
@@ -36,7 +36,7 @@ def registrar_gasto(gastos):
     except ValueError:
         print("Monto inválido.")
         return
-
+#===Seleccionar categoria===#
     mostrar_categorias()
     try:
         cat_idx = int(input("Seleccione número de categoría > ") or 0)
@@ -49,7 +49,7 @@ def registrar_gasto(gastos):
         categoria = "Otros"
 
     descripcion = input("Descripción (opcional) > ").strip()
-
+#===Fecha del gasto===#
     fecha_in = input(f"Fecha (enter = hoy {date.today().isoformat()}) [YYYY-MM-DD o DD/MM/YYYY] > ").strip()
     if fecha_in == "":
         fecha = date.today().isoformat()
@@ -83,7 +83,7 @@ def listar_todos(gastos):
     for g in gastos:
         print(pretty_gasto(g))
     print(f"Total: {total_gastos(gastos):.2f}")
-
+#===Listar por categoria===#
 def listar_por_categoria(gastos):
     mostrar_categorias()
     try:
@@ -102,7 +102,7 @@ def listar_por_categoria(gastos):
     for g in filtrados:
         print(pretty_gasto(g))
     print(f"Subtotal {categoria}: {total_gastos(filtrados):.2f}")
-
+#===Mostrar totales===#
 def mostrar_totales(gastos):
     print("=== TOTALES ===")
     total = total_gastos(gastos)
@@ -111,7 +111,7 @@ def mostrar_totales(gastos):
     print("Totales por categoría:")
     for cat, s in por_cat.items():
         print(f"  {cat:<15}: {s:.2f}")
-
+#===Reportes===#
 def reportes(gastos):
     print("=== REPORTES ===")
     print("1. Reporte diario (hoy)")
@@ -121,7 +121,7 @@ def reportes(gastos):
         opt = int(input("Seleccione > ") or 0)
     except ValueError:
         opt = 0
-
+#===Generar el reporte===#
     if opt == 1:
         t = date.today()
         items = gastos_diarios(gastos, t)
@@ -144,7 +144,7 @@ def reportes(gastos):
     for g in items:
         print(pretty_gasto(g))
     print(f"Total periodo: {total_gastos(items):.2f}")
-
+#===Guardar reporte JSON===#
 def guardar_reporte_json(gastos):
     print("=== GUARDAR REPORTE A JSON ===")
     print("Puedes generar el mismo tipo de reportes.")
@@ -156,7 +156,7 @@ def guardar_reporte_json(gastos):
     if opt not in (1,2,3):
         print("Opción inválida.")
         return
-
+#===Generar el reporte===#
     if opt == 1:
         items = gastos_diarios(gastos, date.today())
         name = f"reporte_diario_{date.today().isoformat()}.json"
@@ -167,7 +167,7 @@ def guardar_reporte_json(gastos):
         t = date.today()
         items = gastos_mes(gastos, t.year, t.month)
         name = f"reporte_mensual_{t.year}_{t.month:02d}.json"
-
+#===Guardar el archivo===#
     out_folder = "reports"
     if not os.path.exists(out_folder):
         os.makedirs(out_folder, exist_ok=True)
@@ -177,7 +177,7 @@ def guardar_reporte_json(gastos):
         print(f"Reporte guardado en {out_path} (elementos: {len(items)})")
     else:
         print("Error guardando el reporte.")
-
+#===Bucle Principal===#
 def main():
     ensure_db_exists()
     gastos = readFile(DB_FILE) or []
@@ -212,3 +212,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#===Edwin Ocampo===#
