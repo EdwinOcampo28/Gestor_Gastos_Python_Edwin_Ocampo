@@ -7,20 +7,6 @@
     "fecha": "2025-12-05"
   },
   {
-    "id": 2,
-    "monto": 22000.0,
-    "categoria": "Entretenimiento",
-    "descripcion": "Youtube Premiun",
-    "fecha": "2025-12-01"
-  },
-  {
-    "id": 3,
-    "monto": 15500.0,
-    "categoria": "Salud",
-    "descripcion": "Inyecion",
-    "fecha": "2025-12-15"
-  },
-  {
     "id": 4,
     "monto": 14000.0,
     "categoria": "Otros",
@@ -33,5 +19,12 @@
     "categoria": "Salud",
     "descripcion": "Inteccion",
     "fecha": "2025-12-08"
+  },
+  {
+    "id": 6,
+    "monto": 23000.0,
+    "categoria": "Entretenimiento",
+    "descripcion": "Netflix",
+    "fecha": "2025-12-10"
   }
 ]
