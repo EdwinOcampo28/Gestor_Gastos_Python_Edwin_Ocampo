@@ -114,6 +114,27 @@ def registrar_gasto(gastos):
         d = parse_date(fecha_in)
         fecha = d.isoformat() if d else date.today().isoformat()
 
+    #Generar Alerta si el gasto excede cierto porcentaje del total Dia 
+    today = date.today()
+    gastos_hoy = gastos_diarios(gastos, today)
+    total_hoy = total_gastos(gastos_hoy)
+    porcentaje_alerta = 0.3  # 30%
+    if (total_hoy + monto) > porcentaje_alerta * 30000:  # Asumiendo un presupuesto diario de 30000
+     print("⚠️ Alerta: Este gasto excede el 30% del presupuesto diario.")
+
+    #Generar Alerta si el gasto excede cierto porcentaje del total Semana
+    gastos_semana = gastos_ultimo_dias(gastos, 7)
+    total_semana = total_gastos(gastos_semana)
+    if (total_semana + monto) > porcentaje_alerta * 150000:  # Asumiendo un presupuesto semanal de 150000
+     print("⚠️ Alerta: Este gasto excede el 30% del presupuesto semanal.")
+    
+    #Generar Alerta si el gasto excede cierto porcentaje del total por categoria 
+    today = date.today()
+    gastos_hoy_cat = [g for g in gastos_mes(gastos, today.year, today.month) if g["categoria"] == categoria]
+    total_hoy_cat = total_gastos(gastos_hoy_cat)
+    if (total_hoy_cat + monto) > porcentaje_alerta * 600000:  # Asumiendo un presupuesto de 600000 por categoría
+     print(f"⚠️ Alerta: Este gasto excede el 30% del presupuesto para la categoría {categoria}.")
+
     # Crear el gasto
     nuevo = {
         "id": next_id(gastos),
@@ -259,6 +280,43 @@ def guardar_reporte_json(gastos):
     else:
         print("Error guardando el reporte.")
 
+
+# ============================================================
+# GUARDAR ALERTA JSON
+# ============================================================
+def guardar_alerta_json(gastos):
+    print("=== GUARDAR ALERTA A JSON ===")
+    print("Puedes generar el mismo tipo de alertas.")
+    print("1. Diario")
+    print("2. Semanal")
+
+    try:
+        opt = int(input("Seleccione > ") or 0)
+    except:
+        opt = 0
+
+    if opt not in (1,2,):
+        print("Opción inválida.")
+        return
+
+    if opt == 1:
+        items = gastos_diarios(gastos, date.today())
+        name = f"porcentaje-alerta_diario_{date.today()}.json"
+    elif opt == 2:
+        items = gastos_ultimo_dias(gastos, 7)
+        name = f"porcentaje-alerta_semanal_{date.today()}.json"
+
+    out_folder = "alerts"
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
+
+    out_path = os.path.join(out_folder, name)
+
+    if saveFile(out_path, items):
+        print(f"✔ alerta guardado en {out_path} (elementos: {len(items)})")
+    else:
+        print("Error guardando la alerta.")
+
 # ============================================================
 # MAIN
 # ============================================================
@@ -289,6 +347,9 @@ def main():
             guardar_reporte_json(gastos)
             pause()
         elif choice == 7:
+            guardar_alerta_json(gastos)
+            pause()
+        elif choice == 8:
             print("Bye!")
             break
         else:
