@@ -1,0 +1,17 @@
+{
+    "porcentaje_alerta_diaria": 500,
+    "porcentaje_alerta_semanal": 4000,
+    "limites_categoria": {
+        "Comida": 60,
+        "Transporte": 50,
+        "Servicios": 70,
+        "Educación": 60,
+        "Entretenimiento": 55,
+        "Salud": 65,
+        "Ropa": 50,
+        "Mascotas": 50,
+        "Hogar": 60,
+        "Deudas": 70,
+        "Otros": 40
+    }
+}
