@@ -11,7 +11,8 @@ def main_menu() -> int:
     print("5. Reportes")
     print("6. Guardar reporte JSON")
     print("7. Ver historial de alertas de gastos")
-    print("8. Salir")
+    print("8. Ver panel de promedios y límites")
+    print("9. Salir")
     try:
         return int(input("Seleccione > ") or 0)
     except:

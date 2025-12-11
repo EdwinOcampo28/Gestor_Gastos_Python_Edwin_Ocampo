@@ -436,6 +436,44 @@ def guardar_reporte_json(gastos):
     else:
         print("Error guardando el reporte.")
 
+#=============================
+#Panel de promedios y límites  
+##=============================      
+
+def panel_promedios(gastos):
+    print("=== PANEL DE PROMEDIOS Y LÍMITES ===")
+
+    config = cargar_config_alertas()
+    if not config:
+        print("⚠ No existe config_alertas.json, no se puede mostrar el panel.")
+        return
+
+    prom_dia = promedio_diario_historico(gastos)
+    prom_sem = promedio_semanal_historico(gastos)
+
+    if not prom_dia or not prom_sem:
+        print("⚠ Aún no hay suficiente historial para calcular promedios.")
+        return
+
+    limite_dia = prom_dia * (config["porcentaje_alerta_diaria"] / 100)
+    limite_sem = prom_sem * (config["porcentaje_alerta_semanal"] / 100)
+
+    print(f"\n📌 PROMEDIOS HISTÓRICOS")
+    print(f" - Promedio diario histórico: {prom_dia:.2f}")
+    print(f" - Promedio semanal histórico: {prom_sem:.2f}")
+
+    print(f"\n🚨 LÍMITES GENERALES SEGÚN CONFIG:")
+    print(f" - Límite diario ({config['porcentaje_alerta_diaria']}%): {limite_dia:.2f}")
+    print(f" - Límite semanal ({config['porcentaje_alerta_semanal']}%): {limite_sem:.2f}")
+
+    print("\n📂 LÍMITES POR CATEGORÍA (según promedio diario):")
+    for categoria, porcentaje in config.get("limites_categoria", {}).items():
+        limite_cat = prom_dia * (porcentaje / 100)
+        print(f" - {categoria}: {porcentaje}% → {limite_cat:.2f}")
+
+    print("\n✔ Panel generado correctamente.")
+
+
 # ============================================================
 # MAIN
 # ============================================================
@@ -468,6 +506,9 @@ def main():
         elif choice == 7:
             ver_alertas()
         elif choice == 8:
+            panel_promedios(gastos)
+            pause()
+        elif choice == 9:
             print("Bye!")
             break
         else:

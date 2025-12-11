@@ -1,6 +1,6 @@
 {
-    "porcentaje_alerta_diaria": 500,
-    "porcentaje_alerta_semanal": 4000,
+    "porcentaje_alerta_diaria": 50,
+    "porcentaje_alerta_semanal": 40,
     "limites_categoria": {
         "Comida": 60,
         "Transporte": 50,
