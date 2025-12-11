@@ -1,6 +1,7 @@
 import os
 import re
-from datetime import date, datetime
+import json
+from datetime import date
 from util.jsonfileHandler import readFile, saveFile
 from util.menu import main_menu, clear_console, pause
 from util.listas import (
@@ -14,6 +15,63 @@ from util.listas import (
     gastos_ultimo_dias,
     gastos_mes,
 )
+
+def ver_alertas():
+    alertas = cargar_alertas()
+
+    if not alertas:
+        print("No hay alertas registradas.")
+        input("Presiona Enter para continuar...")
+        return
+
+    print("====== HISTORIAL DE ALERTAS ======")
+    
+    for a in alertas:
+        print(f"\nFecha: {a['fecha']}")
+        print(f"Tipo: {a['tipo']}")
+        print(f"Categoría: {a['categoria']}")
+        print(f"Monto: {a['monto']}")
+        print(f"Promedio: {a['promedio']}")
+        print(f"Límite: {a['limite']}")
+        print(f"Mensaje: {a['mensaje']}")
+        print("---------------------------------")
+
+    input("\nPresiona Enter para volver al menú...")
+
+
+# ======================================
+# CARGAR ALERTAS DESDE JSON
+# ======================================
+def cargar_alertas():
+    try:
+        with open("alertas.json", "r") as file:
+            return json.load(file)
+    except:
+        return []
+
+# ======================================
+# GUARDAR ALERTAS EN JSON
+# ======================================
+def guardar_alertas(alertas):
+    with open("alertas.json", "w") as file:
+        json.dump(alertas, file, indent=4)
+
+# ======================================
+# REGISTRAR UNA ALERTA NUEVA
+# ======================================
+def registrar_alerta(tipo, categoria, monto, promedio, limite, mensaje):
+    alertas = cargar_alertas()
+    nueva_alerta = {
+        "fecha": str(date.today()),
+        "tipo": tipo,
+        "categoria": categoria,
+        "monto": monto,
+        "promedio": promedio,
+        "limite": limite,
+        "mensaje": mensaje
+    }
+    alertas.append(nueva_alerta)
+    guardar_alertas(alertas)
 
 # ============================================================
 # FUNCIÓN UNIVERSAL PARA MOSTRAR TABLAS
@@ -51,6 +109,38 @@ def imprimir_tabla(gastos):
         print(format_row(row))
 
     print("└" + "┴".join("─" * (col_widths[i] + 2) for i in range(len(headers))) + "┘")
+
+def cargar_config_alertas():
+    path = "config_alertas.json"
+    if not os.path.exists(path):
+        print("⚠ No existe config_alertas.json. No se aplicarán alertas.")
+        return None
+    return readFile(path)
+
+def promedio_diario_historico(gastos):
+    if not gastos:
+        return None
+    
+    # Agrupar gastos por fecha
+    totals = {}
+    for g in gastos:
+        fecha = g["fecha"]
+        totals[fecha] = totals.get(fecha, 0) + g["monto"]
+    
+    return sum(totals.values()) / len(totals)  # promedio
+
+def promedio_semanal_historico(gastos):
+    if not gastos:
+        return None
+
+    # Obtener semana ISO YYYY-WW
+    totals = {}
+    for g in gastos:
+        y, m, d = map(int, g["fecha"].split("-"))
+        semana = date(y, m, d).isocalendar()[1]
+        totals[semana] = totals.get(semana, 0) + g["monto"]
+
+    return sum(totals.values()) / len(totals)
 
 # ============================================================
 # BASE DE DATOS
@@ -113,28 +203,7 @@ def registrar_gasto(gastos):
     else:
         d = parse_date(fecha_in)
         fecha = d.isoformat() if d else date.today().isoformat()
-
-    #Generar Alerta si el gasto excede cierto porcentaje del total Dia 
-    today = date.today()
-    gastos_hoy = gastos_diarios(gastos, today)
-    total_hoy = total_gastos(gastos_hoy)
-    porcentaje_alerta = 0.3  # 30%
-    if (total_hoy + monto) > porcentaje_alerta * 30000:  # Asumiendo un presupuesto diario de 30000
-     print("⚠️ Alerta: Este gasto excede el 30% del presupuesto diario.")
-
-    #Generar Alerta si el gasto excede cierto porcentaje del total Semana
-    gastos_semana = gastos_ultimo_dias(gastos, 7)
-    total_semana = total_gastos(gastos_semana)
-    if (total_semana + monto) > porcentaje_alerta * 150000:  # Asumiendo un presupuesto semanal de 150000
-     print("⚠️ Alerta: Este gasto excede el 30% del presupuesto semanal.")
-    
-    #Generar Alerta si el gasto excede cierto porcentaje del total por categoria 
-    today = date.today()
-    gastos_hoy_cat = [g for g in gastos_mes(gastos, today.year, today.month) if g["categoria"] == categoria]
-    total_hoy_cat = total_gastos(gastos_hoy_cat)
-    if (total_hoy_cat + monto) > porcentaje_alerta * 600000:  # Asumiendo un presupuesto de 600000 por categoría
-     print(f"⚠️ Alerta: Este gasto excede el 30% del presupuesto para la categoría {categoria}.")
-
+        
     # Crear el gasto
     nuevo = {
         "id": next_id(gastos),
@@ -149,6 +218,93 @@ def registrar_gasto(gastos):
         print("✔ Gasto registrado correctamente.")
     else:
         print("Error al guardar.")
+
+    # === SISTEMA DE ALERTAS ===
+    config = cargar_config_alertas()
+    if not config:
+        return  # sin config no hay alertas
+
+    # Calcular totales del día y semana actual
+    hoy = date.today()
+    total_dia_actual = sum(
+        g["monto"] for g in gastos if g["fecha"] == hoy.isoformat()
+    )
+
+    semana_actual = hoy.isocalendar()[1]
+    total_semana_actual = sum(
+        g["monto"]
+        for g in gastos
+        if date.fromisoformat(g["fecha"]).isocalendar()[1] == semana_actual
+    )
+
+    # Promedios históricos
+    prom_dia = promedio_diario_historico(gastos)
+    prom_sem = promedio_semanal_historico(gastos)
+
+    # Si no hay historial, avisar (no alerta crítica)
+    if not prom_dia or not prom_sem:
+        print("⚠ No hay historial suficiente para generar alertas.")
+        return
+
+       # ALERTA DIARIA
+    limite_dia = prom_dia * (config["porcentaje_alerta_diaria"] / 100)
+    if total_dia_actual > limite_dia:
+        print("🚨 ALERTA DIARIA:")
+        print(f"Has superado el {config['porcentaje_alerta_diaria']}% del promedio diario histórico.")
+        print(f"Promedio: {prom_dia:.2f} | Hoy: {total_dia_actual:.2f}")
+
+        # === GUARDAR ALERTA ===
+        registrar_alerta(
+            tipo="Diaria",
+            categoria=categoria,
+            monto=total_dia_actual,
+            promedio=prom_dia,
+            limite=limite_dia,
+            mensaje="Se superó el límite diario permitido."
+        )
+
+    # ALERTA SEMANAL
+    limite_sem = prom_sem * (config["porcentaje_alerta_semanal"] / 100)
+    if total_semana_actual > limite_sem:
+        print("🚨 ALERTA SEMANAL:")
+        print(f"Has superado el {config['porcentaje_alerta_semanal']}% del promedio semanal histórico.")
+        print(f"Promedio: {prom_sem:.2f} | Semana Actual: {total_semana_actual:.2f}")
+
+        # === GUARDAR ALERTA ===
+        registrar_alerta(
+            tipo="Semanal",
+            categoria=categoria,
+            monto=total_semana_actual,
+            promedio=prom_sem,
+            limite=limite_sem,
+            mensaje="Se superó el límite semanal permitido."
+        )
+
+    # ALERTAS POR CATEGORÍA
+    limites_cat = config.get("limites_categoria", {})
+    if categoria in limites_cat:
+        limite_cat = prom_dia * (limites_cat[categoria] / 100)
+        total_cat_hoy = sum(
+            g["monto"]
+            for g in gastos
+            if g["categoria"] == categoria and g["fecha"] == hoy.isoformat()
+        )
+        if total_cat_hoy > limite_cat:
+            print("🚨 ALERTA POR CATEGORÍA:")
+            print(f"Has superado el límite de categoría '{categoria}'.")
+            print(f"Límite: {limites_cat[categoria]}% del promedio diario.")
+            print(f"Promedio: {prom_dia:.2f} | Hoy en '{categoria}': {total_cat_hoy:.2f}")
+
+            # === GUARDAR ALERTA ===
+            registrar_alerta(
+                tipo="Categoría",
+                categoria=categoria,
+                monto=total_cat_hoy,
+                promedio=prom_dia,
+                limite=limite_cat,
+                mensaje=f"Se superó el límite de la categoría '{categoria}'."
+            )
+
 
 # ============================================================
 # LISTAR TODOS
@@ -280,43 +436,6 @@ def guardar_reporte_json(gastos):
     else:
         print("Error guardando el reporte.")
 
-
-# ============================================================
-# GUARDAR ALERTA JSON
-# ============================================================
-def guardar_alerta_json(gastos):
-    print("=== GUARDAR ALERTA A JSON ===")
-    print("Puedes generar el mismo tipo de alertas.")
-    print("1. Diario")
-    print("2. Semanal")
-
-    try:
-        opt = int(input("Seleccione > ") or 0)
-    except:
-        opt = 0
-
-    if opt not in (1,2,):
-        print("Opción inválida.")
-        return
-
-    if opt == 1:
-        items = gastos_diarios(gastos, date.today())
-        name = f"porcentaje-alerta_diario_{date.today()}.json"
-    elif opt == 2:
-        items = gastos_ultimo_dias(gastos, 7)
-        name = f"porcentaje-alerta_semanal_{date.today()}.json"
-
-    out_folder = "alerts"
-    if not os.path.exists(out_folder):
-        os.makedirs(out_folder)
-
-    out_path = os.path.join(out_folder, name)
-
-    if saveFile(out_path, items):
-        print(f"✔ alerta guardado en {out_path} (elementos: {len(items)})")
-    else:
-        print("Error guardando la alerta.")
-
 # ============================================================
 # MAIN
 # ============================================================
@@ -347,8 +466,7 @@ def main():
             guardar_reporte_json(gastos)
             pause()
         elif choice == 7:
-            guardar_alerta_json(gastos)
-            pause()
+            ver_alertas()
         elif choice == 8:
             print("Bye!")
             break
