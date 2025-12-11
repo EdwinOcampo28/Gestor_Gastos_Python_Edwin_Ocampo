@@ -250,7 +250,7 @@ def registrar_gasto(gastos):
     limite_dia = prom_dia * (config["porcentaje_alerta_diaria"] / 100)
     if total_dia_actual > limite_dia:
         print("🚨 ALERTA DIARIA:")
-        print(f"Has superado el {config['porcentaje_alerta_diaria']}% del promedio diario histórico.")
+        print(f"Has superado el {config['porcentaje_alerta_diaria']}% del promedio diario historico.")
         print(f"Promedio: {prom_dia:.2f} | Hoy: {total_dia_actual:.2f}")
 
         # === GUARDAR ALERTA ===
@@ -260,14 +260,14 @@ def registrar_gasto(gastos):
             monto=total_dia_actual,
             promedio=prom_dia,
             limite=limite_dia,
-            mensaje="Se superó el límite diario permitido."
+            mensaje="Se supero el limite diario permitido."
         )
 
     # ALERTA SEMANAL
     limite_sem = prom_sem * (config["porcentaje_alerta_semanal"] / 100)
     if total_semana_actual > limite_sem:
         print("🚨 ALERTA SEMANAL:")
-        print(f"Has superado el {config['porcentaje_alerta_semanal']}% del promedio semanal histórico.")
+        print(f"Has superado el {config['porcentaje_alerta_semanal']}% del promedio semanal historico.")
         print(f"Promedio: {prom_sem:.2f} | Semana Actual: {total_semana_actual:.2f}")
 
         # === GUARDAR ALERTA ===
@@ -277,7 +277,7 @@ def registrar_gasto(gastos):
             monto=total_semana_actual,
             promedio=prom_sem,
             limite=limite_sem,
-            mensaje="Se superó el límite semanal permitido."
+            mensaje="Se supero el limite semanal permitido."
         )
 
     # ALERTAS POR CATEGORÍA
@@ -290,19 +290,19 @@ def registrar_gasto(gastos):
             if g["categoria"] == categoria and g["fecha"] == hoy.isoformat()
         )
         if total_cat_hoy > limite_cat:
-            print("🚨 ALERTA POR CATEGORÍA:")
-            print(f"Has superado el límite de categoría '{categoria}'.")
-            print(f"Límite: {limites_cat[categoria]}% del promedio diario.")
+            print("🚨 ALERTA POR CATEGORIA:")
+            print(f"Has superado el limite de categoria '{categoria}'.")
+            print(f"Limite: {limites_cat[categoria]}% del promedio diario.")
             print(f"Promedio: {prom_dia:.2f} | Hoy en '{categoria}': {total_cat_hoy:.2f}")
 
             # === GUARDAR ALERTA ===
             registrar_alerta(
-                tipo="Categoría",
+                tipo="Categoria",
                 categoria=categoria,
                 monto=total_cat_hoy,
                 promedio=prom_dia,
                 limite=limite_cat,
-                mensaje=f"Se superó el límite de la categoría '{categoria}'."
+                mensaje=f"Se supero el limite de la categoria '{categoria}'."
             )
 
 
