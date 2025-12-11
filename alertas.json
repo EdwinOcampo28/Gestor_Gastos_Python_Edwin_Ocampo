@@ -1,0 +1,20 @@
+[
+    {
+        "fecha": "2025-12-11",
+        "tipo": "Categor\u00eda",
+        "categoria": "Comida",
+        "monto": 65000.0,
+        "promedio": 95916.66666666667,
+        "limite": 57550.0,
+        "mensaje": "Se super\u00f3 el l\u00edmite de la categor\u00eda 'Comida'."
+    },
+    {
+        "fecha": "2025-12-11",
+        "tipo": "Categor\u00eda",
+        "categoria": "Transporte",
+        "monto": 89500.0,
+        "promedio": 110833.33333333333,
+        "limite": 55416.666666666664,
+        "mensaje": "Se super\u00f3 el l\u00edmite de la categor\u00eda 'Transporte'."
+    }
+]
