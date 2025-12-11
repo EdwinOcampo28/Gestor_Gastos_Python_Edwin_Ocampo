@@ -1,4 +1,6 @@
 from datetime import datetime, date, timedelta
+import os
+from util.jsonfileHandler import readFile
 
 CATEGORIES=[
     "Comida","Transporte","Hogar","Servicios","Entretenimiento","Salud","Otros"
