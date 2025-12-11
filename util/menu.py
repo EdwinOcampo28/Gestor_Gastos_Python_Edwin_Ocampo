@@ -10,7 +10,7 @@ def main_menu() -> int:
     print("4. Calcular totales")
     print("5. Reportes")
     print("6. Guardar reporte JSON")
-    print("7. Guardar alerta JSON")
+    print("7. Ver historial de alertas de gastos")
     print("8. Salir")
     try:
         return int(input("Seleccione > ") or 0)
