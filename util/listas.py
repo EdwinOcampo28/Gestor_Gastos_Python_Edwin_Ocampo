@@ -57,4 +57,4 @@ def gastos_mes(items,year,month):
 def pretty_gasto(g):
     return f"ID:{g.get('id')} | {g.get('fecha')} | {g.get('categoria'):<12} | {g.get('monto'):<8} | {g.get('descripcion','')}"
 
-#===Edwin Ocampo===#
+#==Edwin Ocampo==#
