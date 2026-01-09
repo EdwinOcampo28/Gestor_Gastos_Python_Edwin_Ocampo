@@ -38,7 +38,6 @@ def ver_alertas():
 
     input("\nPresiona Enter para volver al menú...")
 
-
 # ======================================
 # CARGAR ALERTAS DESDE JSON
 # ======================================
@@ -305,7 +304,6 @@ def registrar_gasto(gastos):
                 mensaje=f"Se supero el limite de la categoria '{categoria}'."
             )
 
-
 # ============================================================
 # LISTAR TODOS
 # ============================================================
@@ -472,7 +470,6 @@ def panel_promedios(gastos):
         print(f" - {categoria}: {porcentaje}% → {limite_cat:.2f}")
 
     print("\n✔ Panel generado correctamente.")
-
 
 # ============================================================
 # MAIN
