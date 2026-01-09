@@ -21,4 +21,4 @@ def main_menu() -> int:
 def pause():
     input("\nPresione ENTER para continuar...")
 
-#===Edwin Ocampo===#
+#==Edwin Ocampo==#
